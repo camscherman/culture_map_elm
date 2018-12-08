@@ -21,8 +21,8 @@ nav =
 
 list: List Event -> Html Msg
 list events =
-    div [class "p2"]
-        [table []
+    div [class "section"]
+        [table [class "table is-bordered"]
             [thead []
                 [tr []
                     [th [][text "Id"]

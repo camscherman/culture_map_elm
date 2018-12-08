@@ -18,11 +18,14 @@ import Commands exposing (..)
 
 
 main =
-  Browser.element
+  Browser.document
     { init = init
     , update = update
     , subscriptions = subscriptions
-    , view = view
+    , view = \m->
+                { title = "Elm 0.19 starter"
+                , body = [ view m ]
+                }
     }
 
 
