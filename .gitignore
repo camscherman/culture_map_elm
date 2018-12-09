@@ -4,7 +4,7 @@ elm-stuff/
 repl-temp-*
 
 elm.js
-node_modules
+node_modules/
 build
 npm-debug.log
 .env

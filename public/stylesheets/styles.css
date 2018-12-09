@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto+Slab');
+@import url('https://fonts.googleapis.com/css?family=Raleway');
+
+html {
+  font-family: 'Roboto Slab', serif;
+}
+
+* {
+  font-family: inherit;
+}
+
+h1, h2, h3, h4, h5, h6, h7 {
+  font-family: 'Raleway', sans-serif;
+}
