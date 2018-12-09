@@ -1,12 +1,10 @@
 {
-  "name": "culture_map_elm",
-  "version": "0.1",
-  "description": "Front End for Culture Map",
+  "name": "routing_test",
+  "version": "1.0.0",
+  "description": "",
   "main": "index.js",
-  "repository": "https://github.com/camscherman/culture_map_elm",
-  "author": "Cam Scherman <camscherman@hotmail.com>",
-  "license": "none",
-  "private": false,
+  "author": "",
+  "license": "ISC",
   "scripts": {
     "build": "webpack",
     "client": "webpack-dev-server --port 3000"
