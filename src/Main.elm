@@ -1,7 +1,7 @@
 
 import Browser exposing (UrlRequest)
 import Browser.Navigation as Nav exposing (Key)
-import Html exposing (Html, a, div, section, text)
+import Html exposing (Html, a, div, section, text, h1)
 import Html.Attributes exposing (class, href)
 import Routes exposing (Route)
 import Url exposing (Url)
@@ -185,7 +185,7 @@ currentPage model =
     in
     section []
         [ nav model
-        , page
+        , div [class "container"][page]
         ]
 
 
@@ -195,28 +195,28 @@ nav model =
         links =
             case model.route of
                 Routes.HomeRoute ->
-                    [ text "Home" ]
+                     h1 [][ text "Home"] 
 
                 Routes.DisplayRoute _ ->
-                    [ text "Display"
-                    ]
+                     h1 [][text "Display"]
+                    
                 Routes.EventsRoute ->
-                    [ text "Events"
-                    ]
+                     h1 [][text "Events"]
+                    
                 Routes.NotFoundRoute ->
-                    [ linkToHome
-                    ]
+                     h1 [][text "Culture Map"]
+                    
 
         linkToHome =
-            div[][
+            div[class "menu"][
             a [ href Routes.homePath, class "text-white" ] [ text "Home" ],
             a [ href (Routes.displayPath "test"), class "text-white"] [text "Display"],
             a [ href Routes.eventsPath, class  "text-white"][text "Events"]
             ]
     in
     div
-        [ class "mb-2 text-white bg-black p-4" ]
-        links
+        [ class "nav" ]
+        [links,linkToHome]
 
 
 notFoundView : Html msg

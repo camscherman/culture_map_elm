@@ -12,3 +12,65 @@ html {
 h1, h2, h3, h4, h5, h6, h7 {
   font-family: 'Raleway', sans-serif;
 }
+td{
+  font-size: 0.8em;
+  font-weight: 100;
+  padding:10px;
+}
+tr{
+  border-bottom-color: darkgray;
+  border-bottom-width: 0.5px;
+  border-bottom-style: solid; 
+ 
+}
+
+table.is-bordered {
+  margin: 5px;
+  border-style: solid;
+  border-width: 0.5px;
+  padding: 35px;
+}
+table{
+  border-collapse: collapse;
+}
+
+ .nav {
+   font-family: 'Raleway', sans-serif;
+   display:flex;
+   flex-direction: row;
+   background-color: white;
+   color:darkgray;
+   font-size: 0.8em;
+   margin: 0;
+   padding: 5px;
+   margin:auto;
+   justify-content: space-between;
+ }
+
+ .menu {
+   display:flex;
+   justify-content: right;
+   color: black;
+ }
+ .menu > a{
+   padding:10px;
+ }
+ a:link{
+   text-decoration:none;
+   color:black;
+ }
+
+ a:hover{
+   text-decoration:underline;
+   color: darkgray;
+ }
+ a:visited{
+   text-decoration:none;
+   color:black;
+ }
+
+ 
+
+ .container{
+   margin:25px;
+ }

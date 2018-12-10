@@ -5,6 +5,7 @@ import Html.Attributes exposing (class)
 import Http 
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (required)
+import Time exposing ( utc, toYear, toMonth, toDay, toHour, toMinute, toSecond, Month(..))
 
 -- MODEL
 
@@ -12,6 +13,8 @@ type Model =
     Failure
   | Loading
   | Success Events
+
+
 
 type alias Events =
     {events: (List Event)}
@@ -22,8 +25,8 @@ type alias Event =
     ,location: String
     ,description: String
     ,url: String
+    ,startTime: Int
     }
-
 -- 
 type alias Flags =
     String
@@ -36,12 +39,18 @@ type Msg
 -- Fetch Events
 fetchEvents: Cmd Msg
 fetchEvents = 
-  Http.get {url = fetchEventsUrl,expect = Http.expectJson OnFetchEvents eventsDecoder }
+  Http.get {url = fetchEventsUrl,expect = Http.expectJson OnFetchEvents eventsDecoder } 
 
 
 -- Fetch Events Url
 fetchEventsUrl: String
 fetchEventsUrl = "http://localhost:3001/api/v1/events"
+
+-- All Events Decoder
+decodeAllEvents: List Event -> Int
+decodeAllEvents events =
+  1
+
 
 -- Events Decoder
 eventsDecoder: Decode.Decoder (List Event)
@@ -57,6 +66,46 @@ eventDecoder =
         |> required "location" Decode.string
         |> required "description" Decode.string
         |> required "url" Decode.string
+        |> required "startTime" Decode.int 
+
+
+
+-- Time Formatting
+toUtcTime: Int -> String
+toUtcTime intTime =
+  let 
+    time = Time.millisToPosix intTime
+  in
+    monthToString (toMonth utc time)
+    ++ " " ++
+    String.fromInt (toDay utc time)
+    ++ " " ++
+    String.fromInt (toHour utc time)
+    ++ ":" ++
+    minuteToString (toMinute utc time)
+    ++ " " ++ "(UTC)"
+-- Minute Format
+minuteToString: Int -> String
+minuteToString int =
+  if int < 10 then "0" ++ (String.fromInt int)
+  else (String.fromInt int)
+
+-- To Month String
+monthToString: Month -> String
+monthToString month =
+  case month of 
+    Jan -> "January"
+    Feb -> "February"
+    Mar -> "March"
+    Apr -> "April"
+    May -> "May"
+    Jun -> "June"
+    Jul -> "July"
+    Aug -> "August"
+    Sep -> "September"
+    Oct -> "October"
+    Nov -> "November"
+    Dec -> "December"
 
 init : Flags -> (Model, Cmd Msg)
 init _ =
@@ -102,10 +151,10 @@ list events =
         [table [class "table is-bordered"]
             [thead []
                 [tr []
-                    [th [][text "Id"]
+                    [th [][text "Start Time"]
+                    ,th [][text "Id"]
                     ,th [] [text "Name"]
                     ,th [] [text "Location"]
-                    ,th [] [text "Description"]
                     ,th [] [text "Url"]
                     ]
                 ]
@@ -116,11 +165,9 @@ list events =
 eventRow: Event -> Html Msg
 eventRow event =
     tr []
-        [ td [] [ text (String.fromInt event.id) ]
+        [td [] [text (toUtcTime event.startTime) ] 
+        ,td [] [ text (String.fromInt event.id) ]
         , td [] [text event.name ]
         , td [] [text event.location]
-        , td [] [text event.description]
         , td [] [text event.url]
-        , td []
-            []
         ]
