@@ -7,6 +7,7 @@ import Routes exposing (Route)
 import Url exposing (Url)
 import Home as Home 
 import Events as Events
+import Event as Event
 import Display as Display
 
 
@@ -22,6 +23,7 @@ type Page
     = Page_None
     | Page_Home Home.Model
     | Page_Events Events.Model
+    | Page_Event Event.Model
     | Page_Display Display.Model
 
 
@@ -30,6 +32,7 @@ type Msg
     | OnUrlRequest UrlRequest
     | Msg_Home Home.Msg
     | Msg_Events Events.Msg
+    | Msg_Event Event.Msg
     | Msg_Display Display.Msg
 
 
@@ -58,6 +61,13 @@ loadCurrentPage ( model, cmd ) =
                       Events.init model.flags
                   in 
                     (Page_Events pageModel, Cmd.map Msg_Events pageCmd)
+
+                Routes.EventRoute eventId ->
+                  let
+                    (pageModel,pageCmd) =
+                      Event.init eventId
+                  in
+                    (Page_Event pageModel, Cmd.map Msg_Event pageCmd)
 
                 Routes.HomeRoute ->
                     let
@@ -116,7 +126,17 @@ update msg model =
         
         ( Msg_Events subMsg, _ ) ->
             ( model, Cmd.none )
-
+        ( Msg_Event subMsg, Page_Event pageModel) ->
+            let
+              (newPageModel, newCmd) =
+                Event.update subMsg pageModel
+            in
+              ({model | page = Page_Event newPageModel }
+                , Cmd.map Msg_Event newCmd)
+        
+        ( Msg_Event subMsg, _) ->
+                (model, Cmd.none)
+        
         ( Msg_Home subMsg, Page_Home pageModel ) ->
             let
                 ( newPageModel, newCmd ) =
@@ -176,6 +196,9 @@ currentPage model =
                 Page_Events pageModel ->
                     Events.view pageModel
                         |> Html.map Msg_Events
+                Page_Event pageModel ->
+                    Event.view pageModel
+                        |> Html.map Msg_Event
                 Page_Display pageModel ->
                     Display.view pageModel
                         |> Html.map Msg_Display
@@ -195,13 +218,14 @@ nav model =
         links =
             case model.route of
                 Routes.HomeRoute ->
-                     h1 [][ text "Home"] 
+                     h1 [][ text "Culture Map"] 
 
                 Routes.DisplayRoute _ ->
-                     h1 [][text "Display"]
-                    
+                     h1 [][text "Culture Map"]
+                Routes.EventRoute  eventId->
+                     h1 [] [text "Culture Map"]                    
                 Routes.EventsRoute ->
-                     h1 [][text "Events"]
+                     h1 [][text "Culture Map"]
                     
                 Routes.NotFoundRoute ->
                      h1 [][text "Culture Map"]

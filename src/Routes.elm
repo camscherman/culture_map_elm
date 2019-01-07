@@ -8,6 +8,7 @@ type Route
     = HomeRoute
     | EventsRoute
     | DisplayRoute String
+    | EventRoute String
     | NotFoundRoute
 
 
@@ -17,6 +18,7 @@ matchers =
         [ map HomeRoute top
         , map DisplayRoute (s "display" </> string)
         , map HomeRoute (s "home")
+        , map EventRoute (s "events" </> string)
         , map EventsRoute (s "events")
         ]
 
@@ -36,6 +38,8 @@ pathFor route =
     case route of
         EventsRoute ->
             "/events"
+        EventRoute eventId->
+            "/events/" ++ eventId
         HomeRoute ->
             "/home"
 
@@ -55,3 +59,6 @@ displayPath id =
 
 eventsPath =
     pathFor EventsRoute
+
+eventPath eventId =
+    pathFor (EventRoute eventId)

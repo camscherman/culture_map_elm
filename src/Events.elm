@@ -1,11 +1,12 @@
 module Events exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, href)
 import Http 
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (required)
-import Time exposing ( utc, toYear, toMonth, toDay, toHour, toMinute, toSecond, Month(..))
+import TimeHelpers exposing (..)
+import Event exposing (Event, eventDecoder)
 
 -- MODEL
 
@@ -19,14 +20,7 @@ type Model =
 type alias Events =
     {events: (List Event)}
     
-type alias Event =
-    {id: Int
-    ,name: String
-    ,location: String
-    ,description: String
-    ,url: String
-    ,startTime: Int
-    }
+
 -- 
 type alias Flags =
     String
@@ -46,10 +40,6 @@ fetchEvents =
 fetchEventsUrl: String
 fetchEventsUrl = "http://localhost:3001/api/v1/events"
 
--- All Events Decoder
-decodeAllEvents: List Event -> Int
-decodeAllEvents events =
-  1
 
 
 -- Events Decoder
@@ -58,54 +48,11 @@ eventsDecoder =
     Decode.list eventDecoder 
 
 -- Event Decoder
-eventDecoder: Decode.Decoder Event 
-eventDecoder =
-        Decode.succeed Event
-        |> required "id" Decode.int
-        |> required "name" Decode.string
-        |> required "location" Decode.string
-        |> required "description" Decode.string
-        |> required "url" Decode.string
-        |> required "startTime" Decode.int 
 
 
 
--- Time Formatting
-toUtcTime: Int -> String
-toUtcTime intTime =
-  let 
-    time = Time.millisToPosix intTime
-  in
-    monthToString (toMonth utc time)
-    ++ " " ++
-    String.fromInt (toDay utc time)
-    ++ " " ++
-    String.fromInt (toHour utc time)
-    ++ ":" ++
-    minuteToString (toMinute utc time)
-    ++ " " ++ "(UTC)"
--- Minute Format
-minuteToString: Int -> String
-minuteToString int =
-  if int < 10 then "0" ++ (String.fromInt int)
-  else (String.fromInt int)
 
--- To Month String
-monthToString: Month -> String
-monthToString month =
-  case month of 
-    Jan -> "January"
-    Feb -> "February"
-    Mar -> "March"
-    Apr -> "April"
-    May -> "May"
-    Jun -> "June"
-    Jul -> "July"
-    Aug -> "August"
-    Sep -> "September"
-    Oct -> "October"
-    Nov -> "November"
-    Dec -> "December"
+
 
 init : Flags -> (Model, Cmd Msg)
 init _ =
@@ -143,7 +90,7 @@ update msg model =
 nav: Html Msg
 nav =
     div [class "clearfix mb2 white bg-black"]
-        [div [class "left p2"][text "Events"]]
+        [div [class "events-title"][text "Events"]]
 
 list: List Event -> Html Msg
 list events =
@@ -152,10 +99,9 @@ list events =
             [thead []
                 [tr []
                     [th [][text "Start Time"]
-                    ,th [][text "Id"]
                     ,th [] [text "Name"]
                     ,th [] [text "Location"]
-                    ,th [] [text "Url"]
+                    ,th [] [text "Genre"]
                     ]
                 ]
              , tbody [] (List.map eventRow events)   
@@ -166,8 +112,15 @@ eventRow: Event -> Html Msg
 eventRow event =
     tr []
         [td [] [text (toUtcTime event.startTime) ] 
-        ,td [] [ text (String.fromInt event.id) ]
-        , td [] [text event.name ]
+        , td [] [eventLink event.name (eventPath event.id)]
         , td [] [text event.location]
-        , td [] [text event.url]
+        , td [] [text event.genre]
         ]
+
+eventLink: String -> String -> Html Msg
+eventLink title path =
+  a [href path] [text title]
+
+eventPath: Int -> String
+eventPath id =
+  "/events/" ++ String.fromInt id
