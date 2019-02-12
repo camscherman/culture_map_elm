@@ -12,9 +12,19 @@ type alias Model =
     , form: Form
     }
 
-init: Flags -> (Model, Cmd Msg)
+init : Flags -> ( Model, Cmd msg )
 init flags =
-  ({message = "Hello this is home"}, Cmd.none )
+    ( { problems = []
+      , form =
+            { name = ""
+            , genre = ""
+            , description = ""
+            , location = ""
+            , startTime = ""
+            }
+      }
+    , Cmd.none
+    )
 
 type Msg = NewEvent
           | SubmittedEvent
@@ -45,6 +55,17 @@ updateForm transform model =
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
+    SubmittedEvent ->
+            case validate model.form of
+                Ok validForm ->
+                    ( { model | problems = [] }
+                    , Http.send CompletedRegister (register validForm)
+                    )
+
+                Err problems ->
+                    ( { model | problems = problems }
+                    , Cmd.none
+                    )
     EnteredName name ->
       updateForm (\form -> { form | name = name }) model
     EnteredGenre genre ->
@@ -55,6 +76,20 @@ update msg model =
       updateForm (\form -> { form | description = description }) model
     EnteredStartTime startTime ->
       updateForm (\form -> { form | startTime = startTime }) model
+    CompletedEventSubmit (Err error) ->
+            let
+                serverErrors =
+                    Api.decodeErrors error
+                        |> List.map ServerError
+            in
+            ( { model | problems = List.append model.problems serverErrors }
+            , Cmd.none
+            )
+
+        CompletedRegister (Ok viewer) ->
+            ( model
+            , Viewer.store viewer
+            )
 
 viewForm: Form -> Html Msg
 viewForm form =
@@ -118,3 +153,88 @@ subscriptions model =
 view: Model -> Html Msg
 view model =
   div [][text model.message]
+
+submitEvent : TrimmedForm -> Http.Request Viewer
+submitEvent (Trimmed form) =
+    let
+        event =
+            Encode.object
+                [ ( "name", Encode.string form.string )
+                , ( "genre", Encode.string form.string )
+                , ( "description", Encode.string form.string )
+                , ( "location", Encode.string form.location )
+                , ( "startTime", Encode.string form.startTime)
+                ]
+
+        body =
+            Encode.object [ ( "event", event ) ]
+                |> Http.jsonBody
+    in
+    Api.register body Viewer.decoder
+
+type TrimmedForm
+    = Trimmed Form
+
+
+trimFields : Form -> TrimmedForm
+trimFields form =
+    Trimmed
+        { name = String.trim form.name
+        , genre= String.trim form.genre
+        , description = String.trim form.description
+        , location = String.trim form.location
+        , startTime = String.trim form.startTime
+        }
+
+fieldsToValidate : List ValidatedField
+fieldsToValidate =
+    [ Name
+    , Genre
+    , Description 
+    , Location 
+    , StartTime 
+    ]
+
+validate : Form -> Result (List Problem) TrimmedForm
+validate form =
+    let
+        trimmedForm =
+            trimFields form
+    in
+    case List.concatMap (validateField trimmedForm) fieldsToValidate of
+        [] ->
+            Ok trimmedForm
+
+        problems ->
+            Err problems
+
+
+validateField : TrimmedForm -> ValidatedField -> List Problem
+validateField (Trimmed form) field =
+    List.map (InvalidEntry field) <|
+        case field of
+            Name ->
+                if String.isEmpty form.name then
+                    [ "Event name can't be blank." ]
+
+                else
+                    []
+
+            Genre ->
+                if String.isEmpty form.genre then
+                    [ "Genre can't be blank." ]
+
+                else
+                    []
+
+            Description ->
+                if String.isEmpty form.description then
+                    [ "password can't be blank." ]
+                else
+                    []
+            Location ->
+                if String.isEmpty form.location then
+                    ["Location can't be blank."]
+            StartTime -> 
+                if String.isEmpty form.startTime then
+                    ["Start Time can't be blank."]
