@@ -4,8 +4,9 @@
 
 module EventNew exposing (..)
 import Html exposing (..)
-import Html.Attributes exposing (class, href)
+import Html.Attributes exposing (..)
 import Http
+import Json.Encode as Encode
 
 type alias Model =
     { problems: List Problem
@@ -33,7 +34,7 @@ type Msg = NewEvent
           | EnteredDescription String
           | EnteredLocation String
           | EnteredStartTime String
-          | OnEventSubmit (Result Http.Error )
+          | CompletedEventSubmit (Result Http.Error () )
 
 
 type Problem
@@ -59,7 +60,7 @@ update msg model =
             case validate model.form of
                 Ok validForm ->
                     ( { model | problems = [] }
-                    , Http.send CompletedRegister (register validForm)
+                    , submitEvent validForm
                     )
 
                 Err problems ->
@@ -79,14 +80,13 @@ update msg model =
     CompletedEventSubmit (Err error) ->
             let
                 serverErrors =
-                    Api.decodeErrors error
-                        |> List.map ServerError
+                    decodeErrors error
             in
             ( { model | problems = List.append model.problems serverErrors }
             , Cmd.none
             )
 
-        CompletedRegister (Ok viewer) ->
+    CompletedEventSubmit (Ok viewer) ->
             ( model
             , Viewer.store viewer
             )
@@ -152,9 +152,16 @@ subscriptions model =
 
 view: Model -> Html Msg
 view model =
-  div [][text model.message]
+  div [][model.form]
 
-submitEvent : TrimmedForm -> Http.Request Viewer
+decodeErrors : Http.Error -> List String
+decodeErrors error =
+  case error of
+    Http.BadStatus res ->
+      [ServerError "Server Error"]
+
+
+submitEvent : TrimmedForm -> Cmd Msg
 submitEvent (Trimmed form) =
     let
         event =
@@ -170,7 +177,19 @@ submitEvent (Trimmed form) =
             Encode.object [ ( "event", event ) ]
                 |> Http.jsonBody
     in
-    Api.register body Viewer.decoder
+    postEvent newEventUrl body
+
+newEventUrl : String
+newEventUrl = "http://localhost:3001/api/v1/events"
+
+postEvent : String -> Http.Body -> Cmd Msg
+postEvent url body =
+  Http.post
+    {
+        url = url 
+      , body = body
+      , expect = Http.expectWhatever CompletedEventSubmit 
+    }
 
 type TrimmedForm
     = Trimmed Form
@@ -208,6 +227,12 @@ validate form =
         problems ->
             Err problems
 
+type ValidatedField
+    = Name
+    | Genre
+    | Description 
+    | Location 
+    | StartTime
 
 validateField : TrimmedForm -> ValidatedField -> List Problem
 validateField (Trimmed form) field =
@@ -235,6 +260,10 @@ validateField (Trimmed form) field =
             Location ->
                 if String.isEmpty form.location then
                     ["Location can't be blank."]
+                else
+                    []
             StartTime -> 
                 if String.isEmpty form.startTime then
                     ["Start Time can't be blank."]
+                else
+                    []
