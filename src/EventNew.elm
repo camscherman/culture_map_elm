@@ -2,9 +2,12 @@
 -- must be a validator for each parameter. Perhaps one that does nothing off the bat. 
 -- See spa-example Register for more ideas.
 
+-- Notes. Form is not updating onInput. Investigate this
+
 module EventNew exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Http
 import Json.Encode as Encode
 
@@ -86,24 +89,26 @@ update msg model =
             , Cmd.none
             )
 
-    CompletedEventSubmit (Ok viewer) ->
+    CompletedEventSubmit (Ok ()) ->
             ( model
-            , Viewer.store viewer
+            , Cmd.none
             )
+    NewEvent ->
+      (model, Cmd.none )
 
 viewForm: Form -> Html Msg
 viewForm form =
   Html.form [onSubmit SubmittedEvent]
-    [fieldSet [class "form-group"]
+    [fieldset [class "form-group"]
       [ input 
           [ class "form-control form-control-lg"
-          , placeholder "Username"
+          , placeholder "Event Name"
           , onInput EnteredName
           , value form.name
           ]
           []
       ]
-    , fieldSet [class "form-group"]
+    , fieldset [class "form-group"]
       [ input 
           [ class "form-control form-control-lg"
           , placeholder "Genre"
@@ -112,7 +117,7 @@ viewForm form =
           ]
           []
       ]
-    , fieldSet [class "form-group"]
+    , fieldset [class "form-group"]
       [ input 
           [ class "form-control form-control-lg"
           , placeholder "Location"
@@ -121,7 +126,7 @@ viewForm form =
           ]
           []
       ]
-    , fieldSet [class "form-group"]
+    , fieldset [class "form-group"]
       [ input 
           [ class "form-control form-control-lg"
           , placeholder "Description"
@@ -130,11 +135,11 @@ viewForm form =
           ]
           []
       ]
-    , fieldSet [class "form-group"]
+    , fieldset [class "form-group"]
       [ input 
           [ class "form-control form-control-lg"
           , placeholder "Start Time"
-          , onInput EnteredUsername
+          , onInput EnteredStartTime
           , value form.startTime
           ]
           []
@@ -152,13 +157,11 @@ subscriptions model =
 
 view: Model -> Html Msg
 view model =
-  div [][model.form]
+  div [][viewForm model.form]
 
-decodeErrors : Http.Error -> List String
+decodeErrors : Http.Error -> List Problem
 decodeErrors error =
-  case error of
-    Http.BadStatus res ->
-      [ServerError "Server Error"]
+    [ServerError "Server Error"]
 
 
 submitEvent : TrimmedForm -> Cmd Msg
@@ -166,9 +169,9 @@ submitEvent (Trimmed form) =
     let
         event =
             Encode.object
-                [ ( "name", Encode.string form.string )
-                , ( "genre", Encode.string form.string )
-                , ( "description", Encode.string form.string )
+                [ ( "name", Encode.string form.name )
+                , ( "genre", Encode.string form.genre )
+                , ( "description", Encode.string form.description )
                 , ( "location", Encode.string form.location )
                 , ( "startTime", Encode.string form.startTime)
                 ]

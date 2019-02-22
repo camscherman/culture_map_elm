@@ -1,4 +1,4 @@
-module Routes exposing (Route(..), parseUrl, displayPath, homePath, eventsPath)
+module Routes exposing (Route(..), parseUrl, displayPath, homePath, eventsPath, eventNewPath)
 
 import Url exposing (Url)
 import Url.Parser exposing (..)
@@ -7,6 +7,7 @@ import Url.Parser exposing (..)
 type Route
     = HomeRoute
     | EventsRoute
+    | EventNewRoute
     | DisplayRoute String
     | EventRoute String
     | NotFoundRoute
@@ -20,6 +21,7 @@ matchers =
         , map HomeRoute (s "home")
         , map EventRoute (s "events" </> string)
         , map EventsRoute (s "events")
+        , map EventNewRoute (s "new_event")
         ]
 
 
@@ -38,6 +40,8 @@ pathFor route =
     case route of
         EventsRoute ->
             "/events"
+        EventNewRoute ->
+            "/new_event"
         EventRoute eventId->
             "/events/" ++ eventId
         HomeRoute ->
@@ -62,3 +66,6 @@ eventsPath =
 
 eventPath eventId =
     pathFor (EventRoute eventId)
+
+eventNewPath =
+    pathFor (EventNewRoute)
