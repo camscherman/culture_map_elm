@@ -7,7 +7,9 @@
 module EventNew exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Browser.Navigation as Nav exposing (Key)
 import Html.Events exposing (..)
+import Route exposing (Route)
 import Http
 import Json.Encode as Encode
 
@@ -20,7 +22,7 @@ init : Flags -> ( Model, Cmd msg )
 init flags =
     ( { problems = []
       , form =
-            { name = ""
+            { name = "Tester"
             , genre = ""
             , description = ""
             , location = ""
@@ -58,6 +60,7 @@ updateForm transform model =
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
+
   case msg of
     SubmittedEvent ->
             case validate model.form of
@@ -71,7 +74,7 @@ update msg model =
                     , Cmd.none
                     )
     EnteredName name ->
-      updateForm (\form -> { form | name = name }) model
+      updateForm (\form -> {form | name = name }) model
     EnteredGenre genre ->
       updateForm (\form -> { form | genre = genre }) model
     EnteredLocation location ->
@@ -91,7 +94,7 @@ update msg model =
 
     CompletedEventSubmit (Ok ()) ->
             ( model
-            , Cmd.none
+            , Routes.eventsPath
             )
     NewEvent ->
       (model, Cmd.none )
@@ -101,10 +104,9 @@ viewForm form =
   Html.form [onSubmit SubmittedEvent]
     [fieldset [class "form-group"]
       [ input 
-          [ class "form-control form-control-lg"
-          , placeholder "Event Name"
-          , onInput EnteredName
+          [ placeholder "Event Name"
           , value form.name
+          , onInput EnteredName
           ]
           []
       ]
@@ -112,8 +114,8 @@ viewForm form =
       [ input 
           [ class "form-control form-control-lg"
           , placeholder "Genre"
-          , onInput EnteredGenre
           , value form.genre
+          , onInput EnteredGenre
           ]
           []
       ]
@@ -121,8 +123,8 @@ viewForm form =
       [ input 
           [ class "form-control form-control-lg"
           , placeholder "Location"
-          , onInput EnteredLocation
           , value form.location
+          , onInput EnteredLocation
           ]
           []
       ]
@@ -130,8 +132,8 @@ viewForm form =
       [ input 
           [ class "form-control form-control-lg"
           , placeholder "Description"
-          , onInput EnteredDescription
           , value form.description
+          , onInput EnteredDescription
           ]
           []
       ]
@@ -139,8 +141,8 @@ viewForm form =
       [ input 
           [ class "form-control form-control-lg"
           , placeholder "Start Time"
-          , onInput EnteredStartTime
           , value form.startTime
+          , onInput EnteredStartTime
           ]
           []
       ]
@@ -202,7 +204,7 @@ trimFields : Form -> TrimmedForm
 trimFields form =
     Trimmed
         { name = String.trim form.name
-        , genre= String.trim form.genre
+        , genre = String.trim form.genre
         , description = String.trim form.description
         , location = String.trim form.location
         , startTime = String.trim form.startTime

@@ -173,7 +173,7 @@ update msg model =
               (newPageModel, newCmd ) =
                   EventNew.update subMsg pageModel
             in
-              ( { model | page = Page_EventNew pageModel }
+              ( { model | page = Page_EventNew newPageModel }
               , Cmd.map Msg_EventNew newCmd 
               )
         (Msg_EventNew subMsg, _ ) ->
