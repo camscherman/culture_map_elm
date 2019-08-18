@@ -9,6 +9,7 @@ import Home as Home
 import Events as Events
 import Event as Event
 import Display as Display
+import EventNew as EventNew
 
 
 type alias Model =
@@ -25,6 +26,7 @@ type Page
     | Page_Events Events.Model
     | Page_Event Event.Model
     | Page_Display Display.Model
+    | Page_EventNew EventNew.Model
 
 
 type Msg
@@ -34,6 +36,7 @@ type Msg
     | Msg_Events Events.Msg
     | Msg_Event Event.Msg
     | Msg_Display Display.Msg
+    | Msg_EventNew EventNew.Msg
 
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
@@ -82,7 +85,12 @@ loadCurrentPage ( model, cmd ) =
                             Display.init model.flags thing
                     in
                     ( Page_Display pageModel, Cmd.map Msg_Display pageCmd )
-
+                Routes.EventNewRoute ->
+                    let  
+                        (pageModel, pageCmd ) =
+                            EventNew.init model.flags model.navKey
+                    in 
+                    ( Page_EventNew pageModel, Cmd.map Msg_EventNew pageCmd)
                 Routes.NotFoundRoute ->
                     ( Page_None, Cmd.none )
     in
@@ -157,9 +165,20 @@ update msg model =
             ( { model | page = Page_Display newPageModel }
             , Cmd.map Msg_Display newCmd
             )
-
         ( Msg_Display subMsg, _ ) ->
             ( model, Cmd.none )
+
+        (Msg_EventNew subMsg, Page_EventNew pageModel ) ->
+            let
+              (newPageModel, newCmd ) =
+                  EventNew.update subMsg pageModel
+            in
+              ( { model | page = Page_EventNew newPageModel }
+              , Cmd.map Msg_EventNew newCmd 
+              )
+        (Msg_EventNew subMsg, _ ) ->
+            (model, Cmd.none)
+        
 
 
 main : Program Flags Model Msg
@@ -202,7 +221,9 @@ currentPage model =
                 Page_Display pageModel ->
                     Display.view pageModel
                         |> Html.map Msg_Display
-
+                Page_EventNew pageModel ->
+                    EventNew.view pageModel
+                        |> Html.map Msg_EventNew
                 Page_None ->
                     notFoundView
     in
@@ -226,7 +247,8 @@ nav model =
                      h1 [] [text "Culture Map"]                    
                 Routes.EventsRoute ->
                      h1 [][text "Culture Map"]
-                    
+                Routes.EventNewRoute ->
+                    h1 [] [text "Culture Map"] 
                 Routes.NotFoundRoute ->
                      h1 [][text "Culture Map"]
                     
@@ -235,7 +257,8 @@ nav model =
             div[class "menu"][
             a [ href Routes.homePath, class "text-white" ] [ text "Home" ],
             a [ href (Routes.displayPath "test"), class "text-white"] [text "Display"],
-            a [ href Routes.eventsPath, class  "text-white"][text "Events"]
+            a [ href Routes.eventsPath, class  "text-white"][text "Events"],
+            a [ href Routes.eventNewPath, class "text-white"][text "New Event"]
             ]
     in
     div

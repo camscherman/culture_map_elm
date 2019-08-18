@@ -2,19 +2,38 @@
 -- must be a validator for each parameter. Perhaps one that does nothing off the bat. 
 -- See spa-example Register for more ideas.
 
+-- Notes. Form is not updating onInput. Investigate this
+
 module EventNew exposing (..)
 import Html exposing (..)
-import Html.Attributes exposing (class, href)
+import Html.Attributes exposing (..)
+import Browser.Navigation as Nav exposing (Key)
+import Html.Events exposing (..)
+-- import Route exposing (Route)
 import Http
+import Json.Encode as Encode
+import Json.Decode exposing (Decoder, field, string, int)
 
 type alias Model =
     { problems: List Problem
-    , form: Form
+    , form: Form,
+      key: Key
     }
 
-init: Flags -> (Model, Cmd Msg)
-init flags =
-  ({message = "Hello this is home"}, Cmd.none )
+init : Flags -> Key -> ( Model, Cmd msg )
+init flags key =
+    ( { problems = []
+      , form =
+            { name = ""
+            , genre = ""
+            , description = ""
+            , location = ""
+            , startTime = ""
+            }
+      , key = key
+      }
+    , Cmd.none
+    )
 
 type Msg = NewEvent
           | SubmittedEvent
@@ -23,7 +42,7 @@ type Msg = NewEvent
           | EnteredDescription String
           | EnteredLocation String
           | EnteredStartTime String
-          | OnEventSubmit (Result Http.Error )
+          | CompletedEventSubmit (Result Http.Error Int )
 
 
 type Problem
@@ -44,9 +63,21 @@ updateForm transform model =
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
+
   case msg of
+    SubmittedEvent ->
+            case validate model.form of
+                Ok validForm ->
+                    ( { model | problems = [] }
+                    , submitEvent validForm
+                    )
+
+                Err problems ->
+                    ( { model | problems = problems }
+                    , Cmd.none
+                    )
     EnteredName name ->
-      updateForm (\form -> { form | name = name }) model
+      updateForm (\form -> {form | name = name }) model
     EnteredGenre genre ->
       updateForm (\form -> { form | genre = genre }) model
     EnteredLocation location ->
@@ -55,56 +86,70 @@ update msg model =
       updateForm (\form -> { form | description = description }) model
     EnteredStartTime startTime ->
       updateForm (\form -> { form | startTime = startTime }) model
+    CompletedEventSubmit (Err error) ->
+            let
+                serverErrors =
+                    decodeErrors error
+            in
+            ( { model | problems = List.append model.problems serverErrors }
+            , Cmd.none
+            )
+
+    CompletedEventSubmit (Ok id) ->
+            ( model
+            , Nav.pushUrl model.key ("/events/" ++ String.fromInt id)
+            )
+    NewEvent ->
+      (model, Cmd.none )
 
 viewForm: Form -> Html Msg
 viewForm form =
   Html.form [onSubmit SubmittedEvent]
-    [fieldSet [class "form-group"]
+    [fieldset [class "form-group"]
       [ input 
-          [ class "form-control form-control-lg"
-          , placeholder "Username"
-          , onInput EnteredName
+          [ placeholder "Event Name"
           , value form.name
+          , onInput EnteredName
           ]
           []
       ]
-    , fieldSet [class "form-group"]
+    , fieldset [class "form-group"]
       [ input 
           [ class "form-control form-control-lg"
           , placeholder "Genre"
-          , onInput EnteredGenre
           , value form.genre
+          , onInput EnteredGenre
           ]
           []
       ]
-    , fieldSet [class "form-group"]
+    , fieldset [class "form-group"]
       [ input 
           [ class "form-control form-control-lg"
           , placeholder "Location"
-          , onInput EnteredLocation
           , value form.location
+          , onInput EnteredLocation
           ]
           []
       ]
-    , fieldSet [class "form-group"]
+    , fieldset [class "form-group"]
       [ input 
           [ class "form-control form-control-lg"
           , placeholder "Description"
-          , onInput EnteredDescription
           , value form.description
+          , onInput EnteredDescription
           ]
           []
       ]
-    , fieldSet [class "form-group"]
+    , fieldset [class "form-group"]
       [ input 
           [ class "form-control form-control-lg"
           , placeholder "Start Time"
-          , onInput EnteredUsername
           , value form.startTime
+          , onInput EnteredStartTime
           ]
           []
       ]
-    , button [ class "btn btn-lg btn-primary pull-xs-right" ]
+    , button [ class "btn btn-lg btn-primary" ]
             [ text "Submit" ]
     ]
 
@@ -117,4 +162,119 @@ subscriptions model =
 
 view: Model -> Html Msg
 view model =
-  div [][text model.message]
+  div [class "event-form"][viewForm model.form]
+
+decodeErrors : Http.Error -> List Problem
+decodeErrors error =
+    [ServerError "Server Error"]
+
+
+submitEvent : TrimmedForm -> Cmd Msg
+submitEvent (Trimmed form) =
+    let
+        event =
+            Encode.object
+                [ ( "name", Encode.string form.name )
+                , ( "genre", Encode.string form.genre )
+                , ( "description", Encode.string form.description )
+                , ( "location", Encode.string form.location )
+                , ( "startTime", Encode.string form.startTime)
+                ]
+
+        body =
+            Encode.object [ ( "event", event ) ]
+                |> Http.jsonBody
+    in
+    postEvent newEventUrl body
+
+newEventUrl : String
+newEventUrl = "http://localhost:3001/api/v1/events"
+
+postEvent : String -> Http.Body -> Cmd Msg
+postEvent url body =
+  Http.post
+    {
+        url = url 
+      , body = body
+      , expect = Http.expectJson CompletedEventSubmit eventDecoder
+    }
+eventDecoder : Decoder Int
+eventDecoder =
+  field "id" int
+
+type TrimmedForm
+    = Trimmed Form
+
+
+trimFields : Form -> TrimmedForm
+trimFields form =
+    Trimmed
+        { name = String.trim form.name
+        , genre = String.trim form.genre
+        , description = String.trim form.description
+        , location = String.trim form.location
+        , startTime = String.trim form.startTime
+        }
+
+fieldsToValidate : List ValidatedField
+fieldsToValidate =
+    [ Name
+    , Genre
+    , Description 
+    , Location 
+    , StartTime 
+    ]
+
+validate : Form -> Result (List Problem) TrimmedForm
+validate form =
+    let
+        trimmedForm =
+            trimFields form
+    in
+    case List.concatMap (validateField trimmedForm) fieldsToValidate of
+        [] ->
+            Ok trimmedForm
+
+        problems ->
+            Err problems
+
+type ValidatedField
+    = Name
+    | Genre
+    | Description 
+    | Location 
+    | StartTime
+
+validateField : TrimmedForm -> ValidatedField -> List Problem
+validateField (Trimmed form) field =
+    List.map (InvalidEntry field) <|
+        case field of
+            Name ->
+                if String.isEmpty form.name then
+                    [ "Event name can't be blank." ]
+
+                else
+                    []
+
+            Genre ->
+                if String.isEmpty form.genre then
+                    [ "Genre can't be blank." ]
+
+                else
+                    []
+
+            Description ->
+                if String.isEmpty form.description then
+                    [ "password can't be blank." ]
+                else
+                    []
+            Location ->
+                if String.isEmpty form.location then
+                    ["Location can't be blank."]
+                else
+                    []
+            StartTime -> 
+                if String.isEmpty form.startTime then
+                    ["Start Time can't be blank."]
+                else
+                    []
