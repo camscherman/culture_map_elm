@@ -1,6 +1,40 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto+Slab');
 @import url('https://fonts.googleapis.com/css?family=Raleway');
 
+/* Form Styling */
+fieldset.form-group {
+  border: none;
+}
+
+.form-group input {
+  border: 1px solid #999;
+  border-radius: 0;
+  padding: 8px;
+}
+
+.event-form {
+  margin-top: 60px;
+}
+
+.btn {
+  border-radius: 0;
+  border: 1px solid #999;
+  padding: 10px;
+  font-size: 1rem;
+  background-color: white;
+  box-shadow: none;
+  width: 180px;
+}
+.btn:hover {
+  background-color: black;
+  color: white;
+  transition: background-color 0.2s;
+}
+.btn:active {
+  background-color: #221fb8;
+  color: white;
+}
+/* --- */
 html {
   font-family: 'Roboto Slab', serif;
 }
@@ -9,24 +43,27 @@ html {
   font-family: inherit;
 }
 
-h1, h2, h3, h4, h5, h6, h7 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+h7 {
   font-family: 'Raleway', sans-serif;
 }
-td{
+td {
   font-size: 12px;
   font-weight: 100;
-  padding:10px;
+  padding: 10px;
 }
-tr{
+tr {
   border-bottom-color: darkgray;
   border-bottom-width: 0.5px;
-  border-bottom-style: solid; 
- 
+  border-bottom-style: solid;
 }
 
-
-
-p{
+p {
   font-family: 'Raleway', sans-serif;
   font-size: 15px;
   line-height: 2em;
@@ -46,112 +83,142 @@ td:last-child{
 } */
 
 table.is-bordered {
-  margin:5px 10px 5px 85px;
+  margin: 5px 10px 5px 85px;
   border-style: solid;
   border-width: 0.5px;
   padding: 5px;
 }
-table{
+table {
   border-collapse: collapse;
 }
 
- .nav {
-   font-family: 'Raleway', sans-serif;
-   display:flex;
-   flex-direction: row;
-   background-color: white;
-   color:darkgray;
-   font-size: 0.8em;
-   margin: 5px;
-   padding: 5px 35px 5px 15px;
-   margin:auto;
-   justify-content: space-between;
- }
-
- .menu {
-   display:flex;
-   justify-content: right;
-   color: black;
- }
- .menu > a{
-   padding:10px;
- }
- a:link{
-   text-decoration:none;
-   color:black;
- }
-
- a:hover{
-   text-decoration:underline;
-   color: darkgray;
- }
- a:visited{
-   text-decoration:none;
-   color:black;
- }
-
- .event-description{
-   margin-right: 25px;
- }
-
- 
-@media screen and (min-width: 320px){
-
-body {
-  width:576px;
+.nav {
+  font-family: 'Raleway', sans-serif;
+  display: flex;
+  flex-direction: row;
+  background-color: white;
+  color: darkgray;
+  font-size: 0.8em;
+  margin: 5px;
+  padding: 5px 35px 5px 15px;
+  margin: auto;
+  justify-content: space-between;
 }
-.container{
-  width: 100%;
-}
-table.is-bordered {
-  width: 536px;
-  margin: 5px 5px 5px 5px;
-}
-.events-title {
-  margin-left: 5px;
-}
-}
- @media screen and (min-width: 768px){
 
+.menu {
+  display: flex;
+  justify-content: right;
+  color: black;
+}
+.menu > a {
+  padding: 10px;
+}
+a:link {
+  text-decoration: none;
+  color: black;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: darkgray;
+}
+a:visited {
+  text-decoration: none;
+  color: black;
+}
+
+.event-description {
+  margin-right: 25px;
+}
+
+@media screen and (min-width: 320px) {
   body {
-    width:768px;
+    width: 576px;
   }
-  .event-show{
+  .container {
+    width: 100%;
+  }
+  table.is-bordered {
+    width: 536px;
+    margin: 5px 5px 5px 5px;
+  }
+  .events-title {
+    margin-left: 5px;
+  }
+
+  .form-group input {
+    width: 30rem;
+  }
+  .btn {
+    margin-left: 330px;
+  }
+}
+@media screen and (min-width: 768px) {
+  body {
+    width: 768px;
+  }
+  .event-show {
     margin: 20px;
   }
-  table.is-bordered{
+  table.is-bordered {
     width: 668px;
-    margin:5px 10px 5px 45px;
+    margin: 5px 10px 5px 45px;
   }
   .events-title {
     margin-left: 45px;
   }
- }
- @media screen and (min-width: 992px){
-
-  body {
-    width:992px;
+  .event-form {
+    margin-left: 100px;
   }
-  .event-show{
+  .form-group input {
+    width: 36rem;
+  }
+  .btn {
+    margin-left: 427px;
+  }
+}
+@media screen and (min-width: 992px) {
+  body {
+    width: 992px;
+  }
+  .event-show {
     margin: 20px;
   }
   table.is-bordered {
     width: 892px;
-    margin:5px 10px 5px 45px;
+    margin: 5px 10px 5px 45px;
   }
- }
 
- @media screen and (min-width: 1200px){
+  .event-form {
+    margin-left: 180px;
+  }
+  .form-group input {
+    width: 36rem;
+  }
+  .btn {
+    margin-left: 427px;
+  }
+}
+
+@media screen and (min-width: 1200px) {
   body {
     width: 1200px;
   }
-  .event-show{
+  .event-show {
     margin: 20px 45px 15px 20px;
   }
   table.is-bordered {
     width: 1100px;
-    margin:5px 10px 5px 45px;
+    margin: 5px 10px 5px 45px;
   }
-  
- }
 
+  .event-form {
+    margin-left: 300px;
+  }
+  .form-group input {
+    width: 36rem;
+  }
+  .btn {
+    margin-left: 427px;
+  }
+}

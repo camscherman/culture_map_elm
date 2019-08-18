@@ -88,7 +88,7 @@ loadCurrentPage ( model, cmd ) =
                 Routes.EventNewRoute ->
                     let  
                         (pageModel, pageCmd ) =
-                            EventNew.init model.flags
+                            EventNew.init model.flags model.navKey
                     in 
                     ( Page_EventNew pageModel, Cmd.map Msg_EventNew pageCmd)
                 Routes.NotFoundRoute ->

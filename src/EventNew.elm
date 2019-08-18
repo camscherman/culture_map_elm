@@ -9,25 +9,28 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Browser.Navigation as Nav exposing (Key)
 import Html.Events exposing (..)
-import Route exposing (Route)
+-- import Route exposing (Route)
 import Http
 import Json.Encode as Encode
+import Json.Decode exposing (Decoder, field, string, int)
 
 type alias Model =
     { problems: List Problem
-    , form: Form
+    , form: Form,
+      key: Key
     }
 
-init : Flags -> ( Model, Cmd msg )
-init flags =
+init : Flags -> Key -> ( Model, Cmd msg )
+init flags key =
     ( { problems = []
       , form =
-            { name = "Tester"
+            { name = ""
             , genre = ""
             , description = ""
             , location = ""
             , startTime = ""
             }
+      , key = key
       }
     , Cmd.none
     )
@@ -39,7 +42,7 @@ type Msg = NewEvent
           | EnteredDescription String
           | EnteredLocation String
           | EnteredStartTime String
-          | CompletedEventSubmit (Result Http.Error () )
+          | CompletedEventSubmit (Result Http.Error Int )
 
 
 type Problem
@@ -92,9 +95,9 @@ update msg model =
             , Cmd.none
             )
 
-    CompletedEventSubmit (Ok ()) ->
+    CompletedEventSubmit (Ok id) ->
             ( model
-            , Routes.eventsPath
+            , Nav.pushUrl model.key ("/events/" ++ String.fromInt id)
             )
     NewEvent ->
       (model, Cmd.none )
@@ -146,7 +149,7 @@ viewForm form =
           ]
           []
       ]
-    , button [ class "btn btn-lg btn-primary pull-xs-right" ]
+    , button [ class "btn btn-lg btn-primary" ]
             [ text "Submit" ]
     ]
 
@@ -159,7 +162,7 @@ subscriptions model =
 
 view: Model -> Html Msg
 view model =
-  div [][viewForm model.form]
+  div [class "event-form"][viewForm model.form]
 
 decodeErrors : Http.Error -> List Problem
 decodeErrors error =
@@ -193,8 +196,11 @@ postEvent url body =
     {
         url = url 
       , body = body
-      , expect = Http.expectWhatever CompletedEventSubmit 
+      , expect = Http.expectJson CompletedEventSubmit eventDecoder
     }
+eventDecoder : Decoder Int
+eventDecoder =
+  field "id" int
 
 type TrimmedForm
     = Trimmed Form
