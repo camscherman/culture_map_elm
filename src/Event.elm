@@ -5,6 +5,7 @@ import Http
 import Json.Decode as Decode
 import TimeHelpers exposing (..)
 import Json.Decode.Pipeline exposing (required, optional)
+import Location exposing (Flags)
 
 type Model =
     Failure
@@ -27,8 +28,6 @@ init eventId =
 
 type Msg
   = OnFetchEvent (Result Http.Error Event)
-
-type alias Flags = String
 
 type alias Event =
     {id: Int

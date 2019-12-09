@@ -12,6 +12,7 @@ import Html.Events exposing (..)
 -- import Route exposing (Route)
 import Http
 import Json.Encode as Encode
+import Location exposing (Flags)
 import Json.Decode exposing (Decoder, field, string, int)
 
 type alias Model =
@@ -153,8 +154,6 @@ viewForm form =
             [ text "Submit" ]
     ]
 
-
-type alias Flags = String
 
 subscriptions : Model -> Sub Msg
 subscriptions model =

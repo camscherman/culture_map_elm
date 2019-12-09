@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto+Slab');
 @import url('https://fonts.googleapis.com/css?family=Raleway');
+/* Map styling */
+#mapid {
+  height: 800px;
+}
 
 /* Form Styling */
 fieldset.form-group {

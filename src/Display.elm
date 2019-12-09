@@ -2,12 +2,11 @@ module Display exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (class, href)
 import Http
+import Location exposing (Flags)
 
 type alias Model =
     { message : String
     }
-
-type alias Flags = String 
 
 init: Flags -> String ->(Model, Cmd Msg)
 init flags initString =

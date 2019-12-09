@@ -7,6 +7,7 @@ import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (required)
 import TimeHelpers exposing (..)
 import Event exposing (Event, eventDecoder)
+import Location exposing (Flags)
 
 -- MODEL
 
@@ -20,10 +21,6 @@ type Model =
 type alias Events =
     {events: (List Event)}
     
-
--- 
-type alias Flags =
-    String
 
 -- Msg
 type Msg

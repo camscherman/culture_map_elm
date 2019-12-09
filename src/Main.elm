@@ -1,4 +1,6 @@
 
+port module Main exposing (..)
+
 import Browser exposing (UrlRequest)
 import Browser.Navigation as Nav exposing (Key)
 import Html exposing (Html, a, div, section, text, h1)
@@ -10,6 +12,10 @@ import Events as Events
 import Event as Event
 import Display as Display
 import EventNew as EventNew
+import Json.Encode as E
+import Location exposing (Flags, Location)
+port receiveLocation : (Int -> msg) -> Sub msg
+
 
 
 type alias Model =
@@ -19,7 +25,6 @@ type alias Model =
     , page : Page
     }
 
-type alias Flags = String
 type Page
     = Page_None
     | Page_Home Home.Model
@@ -37,6 +42,7 @@ type Msg
     | Msg_Event Event.Msg
     | Msg_Display Display.Msg
     | Msg_EventNew EventNew.Msg
+    | NoMsg
 
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
@@ -99,7 +105,12 @@ loadCurrentPage ( model, cmd ) =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    case model.page of
+      Page_Home home ->
+        Sub.map Msg_Home (Home.subscriptions home)
+      _ -> 
+        Sub.none
+
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -178,6 +189,8 @@ update msg model =
               )
         (Msg_EventNew subMsg, _ ) ->
             (model, Cmd.none)
+        (NoMsg, _) ->
+          (model, Cmd.none)
         
 
 
