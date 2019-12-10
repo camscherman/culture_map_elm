@@ -1,11 +1,14 @@
-debugger;
 const { Elm } = require("./Main");
 
 const css = require("../public/stylesheets/styles.css");
 let mymap;
 
+debugger;
 if ("geolocation" in navigator) {
+  debugger;
   navigator.geolocation.getCurrentPosition(position => {
+    debugger;
+
     const { latitude, longitude } = position.coords;
     var app = Elm.Main.init({
       flags: {
@@ -24,6 +27,14 @@ if ("geolocation" in navigator) {
     });
     app.ports.sendEvents.subscribe(function(data) {
       console.log(data);
+      data.forEach(e =>
+        L.marker([e.latitude, e.longitude])
+          .addTo(mymap)
+          .bindPopup(
+            `<h3>${e.name}</h3><a href=http://${window.location.host}/events/${e.id}>view event</a>`
+          )
+          .openPopup()
+      );
     });
   });
 } else {

@@ -46,7 +46,7 @@ update msg model =
     (OnLoadEvents result, Success modelData) ->
       case result of
         Ok events ->
-          (Success {modelData | events =  Just events}, sendEvents events )
+          (Success {modelData | events =  Just events}, sendEvents events)
         Err _ ->
           (model , Cmd.none)
     -- (OnLoadEvents result, Success modelData) ->

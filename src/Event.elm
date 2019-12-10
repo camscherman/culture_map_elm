@@ -37,6 +37,8 @@ type alias Event =
     ,url: String
     ,startTime: Int
     ,genre: String
+    ,latitude: String
+    ,longitude: String
     }
 
 -- Fetch Event
@@ -60,6 +62,8 @@ eventDecoder =
         |> required "url" Decode.string
         |> required "startTime" Decode.int 
         |> optional "genre" Decode.string "None"
+        |> required "latitude" Decode.string 
+        |> required "longitude" Decode.string
 
 
 update:  Msg -> Model -> (Model, Cmd Msg)
